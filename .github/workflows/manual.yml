@@ -12,14 +12,14 @@ jobs:
       PROJECT_ID: 6 # Reemplaza con el ID real de tu proyecto
     strategy:
       matrix:
-        os: [ windows-latest]
+        os: [windows-latest]
 
     steps:
       - name: Move Issue to Ready Column
         uses: actions/github-script@v7
         with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
-            script: |
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
             const { data: projectColumns } = await github.projects.listColumns({ project_id: process.env.PROJECT_ID });
             const readyColumn = projectColumns.find(column => column.name === 'Ready');
             
@@ -28,5 +28,3 @@ jobs:
               position: 'top',
               column_id: readyColumn.id,
             });
-
-  
