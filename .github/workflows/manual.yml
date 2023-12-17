@@ -3,7 +3,7 @@ name: Automated Workflow
 on:
   issues:
     types:
-      - open
+      - opened
 
 jobs:
   move-to-ready:
