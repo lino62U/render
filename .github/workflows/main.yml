@@ -2,21 +2,22 @@ name: Restrict PR to Dev
 
 on:
   pull_request:
-    branches:
-      - dev
+    paths:
+      - '**/*'
 
 jobs:
   check-branch:
     runs-on: windows-latest
 
     steps:
-    - name: Check if base branch is master
+    - name: Check if base branch is master and compare branch is dev
       shell: powershell
       run: |
         if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
           $BASE_BRANCH = (ConvertFrom-Json $env:GITHUB_EVENT_PATH).pull_request.base.ref
-          if ($BASE_BRANCH -ne "master") {
-            Write-Host "Only pull requests to master are allowed."
+          $COMPARE_BRANCH = (ConvertFrom-Json $env:GITHUB_EVENT_PATH).pull_request.head.ref
+          if ($BASE_BRANCH -ne "master" -or $COMPARE_BRANCH -ne "dev") {
+            Write-Host "Only pull requests from dev to master are allowed."
             exit 1
           }
         }
