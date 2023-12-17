@@ -1,24 +1,29 @@
-name: Restrict PR to Dev
+if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
+    $eventContent = Get-Content $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
+    $BASE_BRANCH = $eventContent.pull_request.base.ref
+    $COMPARE_BRANCH = $eventContent.pull_request.head.ref
+    
+    if ($BASE_BRANCH -ne "master" -or $COMPARE_BRANCH -ne "dev") {
+        Write-Host "Only pull requests from dev to master are allowed."
+        
+        # Cerrar el pull request automáticamente
+        $pullRequestId = $eventContent.pull_request.number
+        $repo = $eventContent.repository.name
+        $owner = $eventContent.repository.owner.login
+        $token = $env.GITHUB_TOKEN
 
-on:
-  pull_request:
-    paths:
-      - '**/*'
-
-jobs:
-  check-branch:
-    runs-on: windows-latest
-
-    steps:
-    - name: Check if base branch is master and compare branch is dev
-      shell: powershell
-      run: |
-        if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
-          $eventContent = Get-Content $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
-          $BASE_BRANCH = $eventContent.pull_request.base.ref
-          $COMPARE_BRANCH = $eventContent.pull_request.head.ref
-          if ($BASE_BRANCH -ne "master" -or $COMPARE_BRANCH -ne "dev") {
-            Write-Host "Only pull requests from dev to master are allowed."
-            exit 1
-          }
+        $headers = @{
+            Authorization = "Bearer $token"
+            Accept = 'application/vnd.github.v3+json'
         }
+
+        $url = "https://api.github.com/repos/$owner/$repo/pulls/$pullRequestId"
+        $body = @{
+            state = 'closed'
+        } | ConvertTo-Json
+
+        Invoke-RestMethod -Uri $url -Method PATCH -Headers $headers -Body $body -ContentType 'application/json'
+
+        exit 1
+    }
+}
