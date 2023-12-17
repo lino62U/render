@@ -14,8 +14,9 @@ jobs:
       shell: powershell
       run: |
         if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
-          $BASE_BRANCH = (ConvertFrom-Json $env:GITHUB_EVENT_PATH).pull_request.base.ref
-          $COMPARE_BRANCH = (ConvertFrom-Json $env:GITHUB_EVENT_PATH).pull_request.head.ref
+          $eventContent = Get-Content $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
+          $BASE_BRANCH = $eventContent.pull_request.base.ref
+          $COMPARE_BRANCH = $eventContent.pull_request.head.ref
           if ($BASE_BRANCH -ne "master" -or $COMPARE_BRANCH -ne "dev") {
             Write-Host "Only pull requests from dev to master are allowed."
             exit 1
