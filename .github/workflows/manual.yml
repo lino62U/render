@@ -19,7 +19,10 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { data: projectColumns } = await github.projects.listColumns({ project_id: PROJECT_ID });
+            console.log('Project Columns:', projectColumns);
+            
             const readyColumn = projectColumns.find(column => column.name === 'Ready');
+            console.log('Ready Column:', readyColumn);
             
             await github.projects.moveCard({
               card_id: context.payload.issue.card_id,
