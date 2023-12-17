@@ -33,4 +33,9 @@ jobs:
           $READY_COLUMN_ID = ($PROJECTS | Where-Object { $_.name -eq "Ready" }).columns.id
           
           # Mover la tarjeta a la columna 'Ready'
-          Invoke-RestMethod -Method Post -Uri "https://api.github.com/projects/columns/cards/$CARD_ID/moves" -Headers @{Authorization="Bearer $GITHUB_TOKEN"; Accept="application/vnd.github.inertia-preview+json"} -Body ("{\"position\": \"top\", \"column_id\": \"$READY_COLUMN_ID\"}")
+          $BODY = @{
+              position = "top"
+              column_id = $READY_COLUMN_ID
+          } | ConvertTo-Json
+
+          Invoke-RestMethod -Method Post -Uri "https://api.github.com/projects/columns/cards/$CARD_ID/moves" -Headers @{Authorization="Bearer $GITHUB_TOKEN"; Accept="application/vnd.github.inertia-preview+json"} -Body $BODY
